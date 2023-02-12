@@ -1,4 +1,6 @@
 import {newEngine} from "@treecg/actor-init-ldes-client"
+import {supabase} from "./supabaseClient.js";
+
 export function fetchLDES() {
 
     const ldes_harvest = [];
@@ -7,13 +9,14 @@ export function fetchLDES() {
         let url = "https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/objecten"
         let options = {
             "pollingInterval": 5000,
+            "disablePolling": true,
             "representation": "Object",
             "mimeType": "application/ld+json",
             "requestHeaders": {
                 Accept: "application/ld+json",
-            }, // comma needed?
+            },
             "fromTime": new Date("2021-02-03T15:46:12.307Z"),
-            "emitMemberOnce": false,
+            "emitMemberOnce": true,
             "disableSynchronization": true,
             "disableFraming": false,
             "jsonLdContext":{
@@ -60,15 +63,29 @@ export function fetchLDES() {
         };
         let LDESClient = newEngine();
         let eventstreamSync = LDESClient.createReadStream(url, options);
-        eventstreamSync.on('data', (member) => {
+        eventstreamSync.on('data', async (member) => {
             if (options.representation) {
                 if (options.representation === "Object") {
                     const memberURI = member.id;
-                    console.log(memberURI);
+                    //console.log(memberURI);
                     const object = member.object;
-                    console.log(object);
-                    ldes_harvest.push(object);
+                    //console.log(object);
                     //console.log(member);
+                    ldes_harvest.push(member)
+                    console.log(ldes_harvest.length);
+                    //console.log(member["object"]['Stuk.identificator'][1]['skos:notation']['@value'])
+
+                    let {data, error} = await supabase
+                        .from('dmg_objects_LDES')
+                        .insert([
+                            {
+                                LDES_raw: member,
+                                objectNumber: member["object"]['Stuk.identificator'][1]['skos:notation']['@value'],
+                                generated_at_time: member["object"]["prov:generatedAtTime"],
+                                is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
+                            }
+                        ])
+
 
                 } else if (options.representation === "Quads") {
                     /* When using Quads representation, the members adhere to the [@Treecg/types Member interface](https://github.com/TREEcg/types/blob/main/lib/Member.ts)
@@ -78,20 +95,20 @@ export function fetchLDES() {
                         }
                     */
                     const memberURI = member.id.value;
-                    console.log(memberURI);
+                    //console.log(memberURI);
                     const quads = member.quads;
-                    console.log(quads);
+                    //console.log(quads);
                 }
             } else {
-                console.log(member);
+                //console.log(member);
             }
 
             // Want to pause event stream?
-            eventstreamSync.pause();
+            //eventstreamSync.pause();
         });
         eventstreamSync.on('metadata', (metadata) => {
             if (metadata.treeMetadata) console.log(metadata.treeMetadata); // follows the structure of the TREE metadata extractor (https://github.com/TREEcg/tree-metadata-extraction#extracted-metadata)
-            console.log(metadata.url); // page from where metadata has been extracted
+            //console.log(metadata.url); // page from where metadata has been extracted
         });
         eventstreamSync.on('pause', () => {
             // Export current state, but only when paused!
@@ -100,10 +117,12 @@ export function fetchLDES() {
         eventstreamSync.on('end', () => {
             console.log("No more data!");
         });
+        return ldes_harvest;
+        console.log(ldes_harvest);
 
     } catch (e) {
         console.error(e);
     }
+    //console.log(ldes_harvest.length)
 
-    return ldes_harvest;
 }
