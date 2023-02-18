@@ -1,7 +1,4 @@
-import {supabase} from "./utils/supabaseClient.js";
 import {fetchLDES, fetchLDES_OSLO} from "./utils/ldes_harvester.js";
-
-
 
 // insert CIDOC
 await fetchLDES();
