@@ -1,9 +1,14 @@
 import {fetchLDES, fetchLDES_OSLO} from "./utils/ldes_harvester.js";
+import * as cron from 'node-cron'
 
-// insert CIDOC
-await fetchLDES();
+cron.schedule('0 18 * * *', start); // run harvest every day at 18:00
 
-// insert OSLO
-await fetchLDES_OSLO();
+async function start(){
+    // insert CIDOC
+    fetchLDES();
+    // insert OSLO
+    fetchLDES_OSLO();
+}
+
 
 //console.log(dmg_objects_LDES);
