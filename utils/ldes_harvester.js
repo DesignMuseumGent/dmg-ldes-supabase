@@ -5,7 +5,7 @@ import {supabase} from "./supabaseClient.js";
 // create a date object using Date constructor
 var dateObj = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 1);
+dateObj.setDate(dateObj.getDate() - 2);
 
 
 export function fetchLDES() {
