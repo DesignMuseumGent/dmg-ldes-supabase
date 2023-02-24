@@ -1,4 +1,4 @@
-import {fetchObjectLDES, fetchObjectLDES_OSLO, fetchThesaurusLDES} from "./utils/ldes_harvester.js";
+import {fetchObjectLDES, fetchObjectLDES_OSLO, fetchThesaurusLDES, fetchPersonenLDES} from "./utils/ldes_harvester.js";
 import * as cron from 'node-cron'
 
 cron.schedule('09 00 * * *', start); // run harvest every day at 10:00
@@ -11,5 +11,8 @@ async function start(){
 
     //THESAURUS
     fetchThesaurusLDES();
+
+    // PERSONEN EN INSTELLINGEN
+    fetchPersonenLDES();
 }
 
