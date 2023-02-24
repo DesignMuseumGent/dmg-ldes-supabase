@@ -9,6 +9,4 @@ async function start(){
     fetchLDES_OSLO();
 }
 
-
-
 //console.log(dmg_objects_LDES);

@@ -90,6 +90,7 @@ export function fetchLDES() {
                                     LDES_raw: member,
                                     generated_at_time: member["object"]["prov:generatedAtTime"]
                                 }])
+                            .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
                     } else {
                         console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
