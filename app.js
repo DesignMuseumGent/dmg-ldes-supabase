@@ -1,7 +1,7 @@
 import {fetchObjectLDES, fetchObjectLDES_OSLO, fetchThesaurusLDES, fetchPersonenLDES} from "./utils/ldes_harvester.js";
 import * as cron from 'node-cron'
 
-cron.schedule('30 8 * * *', start); // run harvest every day at 10:00
+cron.schedule('32 8 * * *', start); // run harvest every day at 10:00
 async function start(){
     // OBJECTS
     // insert CIDOC
