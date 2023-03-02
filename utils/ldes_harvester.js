@@ -7,7 +7,7 @@ var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
 dateObj.setDate(dateObj.getDate() - 2);
-//fetchFromStart.setDate(dateObj.getDate() - 200);
+//fetchFromStart.setDate(dateObj.getDate() - 20);
 
 
 export function fetchObjectLDES() {
@@ -83,8 +83,7 @@ export function fetchObjectLDES() {
                         .select("*")
                         .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                    if (data) {
-                        console.log("there is data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                    if (data != "") {
                         console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         let {data, error} = await supabase.from('dmg_objects_LDES')
                             .update([
@@ -95,7 +94,7 @@ export function fetchObjectLDES() {
                             .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
                     } else {
-                        console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                        //console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         let {data, error} = await supabase
                             .from('dmg_objects_LDES')
@@ -343,7 +342,7 @@ export function fetchThesaurusLDES() {
                             .select("*")
                             .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                        if (data) {
+                        if (data != "") {
                             console.log("there is data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                             console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                             let {data, error} = await supabase.from('dmg_objects_LDES')
@@ -426,7 +425,7 @@ export function fetchPersonenLDES() {
             "requestHeaders": {
                 Accept: "application/ld+json",
             },
-            "fromTime": new Date("2021-02-03T15:46:12.307Z"),
+            "fromTime": new Date(dateObj),
             "emitMemberOnce": true,
             "disableSynchronization": true,
             "disableFraming": false,
@@ -479,7 +478,7 @@ export function fetchPersonenLDES() {
                             .select("*")
                             .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                        if (data) {
+                        if (data != "") {
                             console.log("there is data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                             console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                             let {data, error} = await supabase.from('dmg_personen_LDES')
