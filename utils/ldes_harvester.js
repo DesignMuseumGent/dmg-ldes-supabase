@@ -89,7 +89,8 @@ export function fetchObjectLDES() {
                             .update([
                                 {
                                     LDES_raw: member,
-                                    generated_at_time: member["object"]["prov:generatedAtTime"]
+                                    generated_at_time: member["object"]["prov:generatedAtTime"],
+                                    iiif_manifest: member["object"]["http://www.cidoc-crm.org/cidoc-crm/P129i_is_subject_of"]["@id"]
                                 }])
                             .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
@@ -104,7 +105,8 @@ export function fetchObjectLDES() {
                                     id: member["object"]['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'],
                                     objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
                                     generated_at_time: member["object"]["prov:generatedAtTime"],
-                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
+                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"],
+                                    iiif_manifest: member["object"]["http://www.cidoc-crm.org/cidoc-crm/P129i_is_subject_of"]["@id"]
                                 }
                             ])
                     }
@@ -500,6 +502,7 @@ export function fetchPersonenLDES() {
                                         id: _id[5],
                                         //objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
                                         generated_at_time: member["object"]["@id"].split("/")[6],
+                                        agent_id: member["object"]["http://www.w3.org/ns/adms#identifier"][1]["skos:notation"]["@value"],
                                         is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
                                     }
                                 ])
