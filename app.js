@@ -1,12 +1,16 @@
-import {fetchObjectLDES, fetchObjectLDES_OSLO, fetchThesaurusLDES, fetchPersonenLDES} from "./utils/ldes_harvester.js";
+import {fetchObjectLDES,
+    fetchObjectLDES_OSLO,
+    fetchThesaurusLDES,
+    fetchPersonenLDES, fetchExhibitionLDES} from "./utils/ldes_harvester.js";
 import * as cron from 'node-cron'
 
 cron.schedule('32 8 * * *', start); // run harvest every day at 10:00
 async function start(){
+
     // OBJECTS
     // insert CIDOC
     fetchObjectLDES();
-    // insert OSLO
+    // insert OSLO (UNSTABLE)
     fetchObjectLDES_OSLO();
 
     //THESAURUS
@@ -14,13 +18,17 @@ async function start(){
 
     // PERSONEN EN INSTELLINGEN
     fetchPersonenLDES();
+
+    // EXHIBITION
+    fetchExhibitionLDES();
 }
 
-//fetchObjectLDES();
+// fetchObjectLDES();
 // insert OSLO
-//fetchObjectLDES_OSLO();
-//THESAURUS
-//fetchThesaurusLDES();
+// fetchObjectLDES_OSLO();
+// THESAURUS
+// fetchThesaurusLDES();
 // PERSONEN EN INSTELLINGEN
 //fetchPersonenLDES();
-
+// TENTOONSTELLING
+//fetchExhibitionLDES();
