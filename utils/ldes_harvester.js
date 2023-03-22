@@ -6,7 +6,7 @@ import {supabase} from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 2);
+dateObj.setDate(dateObj.getDate() - 10);
 fetchFromStart.setDate(dateObj.getDate() - 200);
 
 
@@ -489,19 +489,21 @@ export function fetchPersonenLDES() {
 
                         } else {
                             console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-                            console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-                            let {data, error} = await supabase
-                                .from('dmg_personen_LDES')
-                                .insert([
-                                    {
-                                        LDES_raw: member,
-                                        id: _id[5],
-                                        //objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
-                                        generated_at_time: member["object"]["@id"].split("/")[6],
-                                        agent_id: member["object"]["http://www.w3.org/ns/adms#identifier"][1]["skos:notation"]["@value"],
-                                        is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
-                                    }
-                                ])
+                            try {
+                                console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                                let {data, error} = await supabase
+                                    .from('dmg_personen_LDES')
+                                    .insert([
+                                        {
+                                            LDES_raw: member,
+                                            id: _id[5],
+                                            //objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
+                                            generated_at_time: member["object"]["@id"].split("/")[6],
+                                            agent_id: member["object"]["http://www.w3.org/ns/adms#identifier"][1]["skos:notation"]["@value"],
+                                            is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
+                                        }
+                                    ])
+                            } catch(e) {console.log(e)}
                         }
 
 
@@ -560,7 +562,7 @@ export function fetchExhibitionLDES() {
             "requestHeaders": {
                 Accept: "application/ld+json",
             },
-            "fromTime": new Date(fetchFromStart),
+            "fromTime": new Date(dateObj),
             "emitMemberOnce": true,
             "disableSynchronization": true,
             "disableFraming": false,
@@ -601,10 +603,10 @@ export function fetchExhibitionLDES() {
                     const object = member.object;
                     ldes_harvest.push(member)
                     //console.log(member)
-                    console.log(member)
-                    console.log(ldes_harvest.length);
-                    console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'])
-                    console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'])
+                    //console.log(member)
+                    //console.log(ldes_harvest.length);
+                    //console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'])
+                    //console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'])
 
 
                     // check if object in DB;

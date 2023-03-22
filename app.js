@@ -4,7 +4,7 @@ import {fetchObjectLDES,
     fetchPersonenLDES, fetchExhibitionLDES} from "./utils/ldes_harvester.js";
 import * as cron from 'node-cron'
 
-cron.schedule('32 8 * * *', start); // run harvest every day at 10:00
+cron.schedule('0 0 * * 0', start); // run harvest every day at 10:00
 async function start(){
 
     // OBJECTS
@@ -23,11 +23,11 @@ async function start(){
     fetchExhibitionLDES();
 }
 
-// fetchObjectLDES();
+//fetchObjectLDES();
 // insert OSLO
-// fetchObjectLDES_OSLO();
+//fetchObjectLDES_OSLO();
 // THESAURUS
-// fetchThesaurusLDES();
+//fetchThesaurusLDES();
 // PERSONEN EN INSTELLINGEN
 //fetchPersonenLDES();
 // TENTOONSTELLING
