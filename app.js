@@ -8,7 +8,7 @@ console.log("---- harvester online -----")
 console.log("---- next harvest today at: 15:00 -----")
 
 
-cron.schedule('15 13 * * *', start); // run harvest every day at 10:00
+cron.schedule('* * * * *', start); // run harvest every day at 10:00
 function start(){
 
     // OBJECTS
