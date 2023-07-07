@@ -8,8 +8,8 @@ console.log("---- harvester online -----")
 console.log("---- next harvest today at: 15:00 -----")
 
 
-cron.schedule('00 15 * * *', start); // run harvest every day at 10:00
-async function start(){
+cron.schedule('15 13 * * *', start); // run harvest every day at 10:00
+function start(){
 
     // OBJECTS
     // insert CIDOC
@@ -42,7 +42,7 @@ async function start(){
 
 }
 
-//fetchObjectLDES();
+// fetchObjectLDES();
 // insert OSLO
 //fetchObjectLDES_OSLO();
 // THESAURUS
