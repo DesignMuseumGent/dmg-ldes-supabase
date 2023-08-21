@@ -6,8 +6,8 @@ import {supabase} from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 10);
-fetchFromStart.setDate(dateObj.getDate() - 200);
+dateObj.setDate(dateObj.getDate() - 4);
+fetchFromStart.setDate(dateObj.getDate() - 2000);
 
 
 export function fetchObjectLDES() {
@@ -596,83 +596,203 @@ export function fetchExhibitionLDES() {
 
         let LDESClient = newEngine();
         let eventstreamSync = LDESClient.createReadStream(url, options);
-        eventstreamSync.on('data', async (member) => {
-            if (options.representation) {
-                if (options.representation === "Object") {
-                    const memberURI = member.id;
-                    const object = member.object;
-                    ldes_harvest.push(member)
-                    //console.log(member)
-                    //console.log(member)
-                    //console.log(ldes_harvest.length);
-                    //console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'])
-                    //console.log(member["object"]['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'])
 
+        try{
+            eventstreamSync.on('data', async (member) => {
+                if (options.representation) {
+                    if (options.representation === "Object") {
+                        const memberURI = member.id;
+                        const object = member.object;
+                        ldes_harvest.push(member)
+                        console.log(ldes_harvest.length);
 
-                    // check if object in DB;
-                    let {data, error} = await supabase
-                        .from("dmg_tentoonstelling_LDES")
-                        .select("*")
-                        .eq('id', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                        // check if object in DB;
+                         let {data, error} = await supabase
+                             .from("dmg_tentoonstelling_LDES")
+                             .select("*")
+                             .eq('id', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                    if (data != "") {
-                        console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-                        let {data, error} = await supabase.from('dmg_tentoonstelling_LDES')
-                            .update([
-                                {
-                                    LDES_raw: member,
-                                    generated_at_time: member["object"]["prov:generatedAtTime"],
-                                }])
-                            .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                         if (data != "") {
+                             console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                             let {data, error} = await supabase.from('dmg_tentoonstelling_LDES')
+                                 .update([
+                                     {
+                                         LDES_raw: member,
+                                         generated_at_time: member["object"]["prov:generatedAtTime"],
+                                     }])
+                                 .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                    } else {
-                        console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-                        let {data, error} = await supabase
-                            .from('dmg_tentoonstelling_LDES')
-                            .insert([
-                                {
-                                    LDES_raw: member,
-                                    id: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
-                                    exh_PID: member['object']['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'],
-                                    generated_at_time: member["object"]["prov:generatedAtTime"],
-                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"],
-                                }
-                            ])
+                         } else {
+                             console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                             let {data, error} = await supabase
+                                 .from('dmg_tentoonstelling_LDES')
+                                 .insert([
+                                     {
+                                         LDES_raw: member,
+                                         id: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
+                                         exh_PID: member['object']['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'],
+                                         generated_at_time: member["object"]["prov:generatedAtTime"],
+                                         is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"],
+                                     }
+                                 ])
+                         }
                     }
+                } else {
 
-                } else if (options.representation === "Quads") {
-                    /* When using Quads representation, the members adhere to the [@Treecg/types Member interface](https://github.com/TREEcg/types/blob/main/lib/Member.ts)
-                        interface Member {
-                            id: RDF.Term;
-                            quads: Array<RDF.Quad>;
-                        }
-                    */
-                    const memberURI = member.id.value;
-                    const quads = member.quads;
                 }
-            } else {
 
-            }
+            });
+        } catch(e) {
+            console.log(e)
+        }
 
-            // Want to pause event stream?
-            //eventstreamSync.pause();
-        });
         eventstreamSync.on('metadata', (metadata) => {
             if (metadata.treeMetadata) ; // console.log(metadata.treeMetadata) follows the structure of the TREE metadata extractor (https://github.com/TREEcg/tree-metadata-extraction#extracted-metadata)
         });
         eventstreamSync.on('pause', () => {
-            // Export current state, but only when paused!
             let state = eventstreamSync.exportState();
         });
         eventstreamSync.on('end', () => {
             console.log("No more data!");
         });
         return ldes_harvest;
-        //console.log(ldes_harvest);
 
     } catch (e) {
         console.error(e);
     }
-    //console.log(ldes_harvest.length)
+
+}
+
+export function fetchArchiveLDES() {
+    // function that fetches all publsihed objects in event-stream https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/archief
+    const ldes_harvest = [];
+    const options = {};
+
+    try {
+        let url = "https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/archief"
+        let options = {
+            "pollingInterval": 5000,
+            "disablePolling": true,
+            "representation": "Object",
+            "mimeType": "application/ld+json",
+            "requestHeaders": {
+                Accept: "application/ld+json",
+            },
+            "fromTime": new Date(fetchFromStart),
+            "emitMemberOnce": true,
+            "disableSynchronization": true,
+            "disableFraming": false,
+            "jsonLdContext":{
+                "@context": [
+                    {
+                        "la": "https://linked.art/ns/terms/",
+                        "cest": "https://www.projectcest.be/wiki/Publicatie:Invulboek_objecten/Veld/",
+                        "foaf": "http://xmlns.com/foaf/0.1/",
+                        "prov": "http://www.w3.org/ns/prov#",
+                        "skos": "http://www.w3.org/2004/02/skos/core#",
+                        "cidoc": "http://www.cidoc-crm.org/cidoc-crm/",
+                        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+                        "inhoud": "http://www.cidoc-crm.org/cidoc-crm/P190_has_symbolic_content",
+                        "foaf:page": {
+                            "@type": "@id"
+                        },
+                        "opmerking": "http://www.w3.org/2004/02/skos/core#note",
+                        "equivalent": {
+                            "@id": "la:equivalent",
+                            "@type": "@id"
+                        },
+                        "dcterms:isVersionOf": {
+                            "@type": "@id"
+                        }
+                    }
+                ]
+            }
+        };
+
+
+        let LDESClient = newEngine();
+        let eventstreamSync = LDESClient.createReadStream(url, options);
+
+        try{
+            eventstreamSync.on('data', async (member) => {
+                if (options.representation) {
+                    if (options.representation === "Object") {
+                        const memberURI = member.id;
+                        const object = member.object;
+                        ldes_harvest.push(member)
+                        console.log(ldes_harvest.length);
+
+                        // load image API from manifest
+
+
+                        // check if object in DB;
+                        let {data, error} = await supabase
+                            .from("dmg_archief_LDES")
+                            .select("*")
+                            .eq('id', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+
+                        if (data !== []) {
+                            console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                            let {data, error} = await supabase.from('dmg_archief_LDES')
+                                .update([
+                                    {
+                                        LDES_raw: member,
+                                        generated_at_time: member["object"]["prov:generatedAtTime"],
+                                    }])
+                                .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+
+                        } else {
+
+                            async function load() {
+                            let url = member["object"]["cidoc:P129i_is_subject_of"]["@id"];
+                            try {
+                                let obj = await (await fetch(url)).json();
+                                return obj["sequences"][0]["canvases"][0]["images"][0]["resource"]["@id"];
+                            } catch (e) {
+                                return ""
+                            }
+
+                        }
+
+                        let imageAPI = await load();
+
+                        console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                        let {data, error} = await supabase
+                            .from('dmg_archief_LDES')
+                            .insert([
+                                {
+                                    LDES_raw: member,
+                                    objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
+                                    generated_at_time: member["object"]["prov:generatedAtTime"],
+                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"],
+                                    iiif_manifest: member["object"]["cidoc:P129i_is_subject_of"]["@id"],
+                                    iiif_image: imageAPI
+                                }
+                            ])
+                        }
+                    }
+                } else {
+
+                }
+
+            });
+        } catch(e) {
+            console.log(e)
+        }
+
+        eventstreamSync.on('metadata', (metadata) => {
+            if (metadata.treeMetadata) ; // console.log(metadata.treeMetadata) follows the structure of the TREE metadata extractor (https://github.com/TREEcg/tree-metadata-extraction#extracted-metadata)
+        });
+        eventstreamSync.on('pause', () => {
+            let state = eventstreamSync.exportState();
+        });
+        eventstreamSync.on('end', () => {
+            console.log("No more data!");
+        });
+        return ldes_harvest;
+
+    } catch (e) {
+        console.error(e);
+    }
 
 }
