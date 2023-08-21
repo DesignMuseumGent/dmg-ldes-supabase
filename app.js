@@ -1,53 +1,29 @@
-import {fetchObjectLDES,
+import {
+    fetchObjectLDES,
     fetchObjectLDES_OSLO,
     fetchThesaurusLDES,
-    fetchPersonenLDES, fetchExhibitionLDES} from "./utils/ldes_harvester.js";
-import * as cron from 'node-cron'
+    fetchPersonenLDES,
+    fetchExhibitionLDES,
+    fetchArchiveLDES
+} from "./utils/ldes_harvester.js";
 
-console.log("---- harvester online -----")
-console.log("---- next harvest today at: 15:00 -----")
-
-
-cron.schedule('* * * * *', start); // run harvest every day at 10:00
-function start(){
-
-    // OBJECTS
-    // insert CIDOC
-    console.log("-----------------------------")
-    console.log("start harvesting objects")
+try {
+    console.log("fetching human made objects")
     fetchObjectLDES();
-    console.log("done harvesting objects")
-    
-    // insert OSLO (UNSTABLE)
-    //fetchObjectLDES_OSLO();
 
-    //THESAURUS
-    console.log("-----------------------------")
-    console.log("start harvesting thesaurus")
-    fetchThesaurusLDES();
-    console.log("done harvesting thesaurus")
+    console.log("fetching thesaurus")
+    fetchThesaurusLDES()
 
-
-    // PERSONEN EN INSTELLINGEN
-    //fetchPersonenLDES();
-
-    // EXHIBITION
-    console.log("-----------------------------")
-    console.log("start harvesting exhibitions")
+    console.log("fetching exhibition")
     fetchExhibitionLDES();
-    console.log("done harvesting exhibitions")
 
-    console.log("-----------------------------")
-    console.log("---- next harvest today at: 15:00 -----")
+    console.log("fetching agents")
+    fetchPersonenLDES();
 
+    fetchArchiveLDES()
+
+    console.log("done harvesting LDES")
+
+} catch(e) {
+    console.log(e)
 }
-
-// fetchObjectLDES();
-// insert OSLO
-//fetchObjectLDES_OSLO();
-// THESAURUS
-//fetchThesaurusLDES();
-// PERSONEN EN INSTELLINGEN
-//fetchPersonenLDES();
-// TENTOONSTELLING
-//fetchExhibitionLDES();
