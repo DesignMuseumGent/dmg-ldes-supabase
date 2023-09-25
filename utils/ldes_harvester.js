@@ -6,7 +6,7 @@ import {supabase} from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 4);
+dateObj.setDate(dateObj.getDate() - 20);
 fetchFromStart.setDate(dateObj.getDate() - 2000);
 
 
@@ -77,25 +77,14 @@ export function fetchObjectLDES() {
                     ldes_harvest.push(member)
                     console.log(ldes_harvest.length);
 
-                    // check if object in DB;
+                // check if object in DB;
                     let {data, error} = await supabase
                         .from("dmg_objects_LDES")
                         .select("*")
                         .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
 
-                    if (data != "") {
-                        console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-                        let {data, error} = await supabase.from('dmg_objects_LDES')
-                            .update([
-                                {
-                                    LDES_raw: member,
-                                    generated_at_time: member["object"]["prov:generatedAtTime"],
-                                    iiif_manifest: member["object"]["http://www.cidoc-crm.org/cidoc-crm/P129i_is_subject_of"]["@id"]
-                                }])
-                            .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
-
-                    } else {
-                        //console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                    if (data = "") {
+                        console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         let {data, error} = await supabase
                             .from('dmg_objects_LDES')
@@ -105,19 +94,22 @@ export function fetchObjectLDES() {
                                     id: member["object"]['http://www.w3.org/ns/adms#identifier'][0]['skos:notation']['@value'],
                                     objectNumber: member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'],
                                     generated_at_time: member["object"]["prov:generatedAtTime"],
-                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"],
-                                    iiif_manifest: member["object"]["http://www.cidoc-crm.org/cidoc-crm/P129i_is_subject_of"]["@id"]
+                                    is_version_of: member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"]
                                 }
                             ])
-                    }
+                            .select()
 
-                } else if (options.representation === "Quads") {
+                    } else {
+                         }
+
+                    } else if (options.representation === "Quads") {
                     /* When using Quads representation, the members adhere to the [@Treecg/types Member interface](https://github.com/TREEcg/types/blob/main/lib/Member.ts)
                         interface Member {
                             id: RDF.Term;
                             quads: Array<RDF.Quad>;
                         }
                     */
+
                     const memberURI = member.id.value;
                     const quads = member.quads;
                 }

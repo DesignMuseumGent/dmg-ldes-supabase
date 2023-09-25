@@ -21,7 +21,6 @@ try {
     fetchPersonenLDES();
 
     fetchArchiveLDES()
-
     console.log("done harvesting LDES")
 
 } catch(e) {
