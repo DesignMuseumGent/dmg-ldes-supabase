@@ -36,23 +36,3 @@ function executeEveryMonday() {
 }
 
 executeEveryMonday()
-
-try {
-    console.log("fetching human made objects")
-    fetchObjectLDES();
-
-    console.log("fetching thesaurus")
-    fetchThesaurusLDES()
-
-    console.log("fetching exhibition")
-    fetchExhibitionLDES();
-
-    console.log("fetching agents")
-    fetchPersonenLDES();
-
-    fetchArchiveLDES()
-    console.log("done harvesting LDES")
-
-} catch(e) {
-    console.log(e)
-}
