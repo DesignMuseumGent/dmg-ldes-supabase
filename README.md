@@ -13,10 +13,12 @@ Make sure you have Node installed on your device.
 
 1. add .env at top level containing the credentials to connect with PG. (we are running our instance on a Supabase)
 
-'''
+```
 SUPABASE_KEY= *****
 SUPABSASE_URL = *****
-'''
+```
+
+
 
 
 
