@@ -26,8 +26,17 @@ SUPABSASE_URL = *****
 ```
 
 ### set paramaters
-change range: (if harvesting for the first time, make sure to use "harvest from start"). 
+
+#### set range
+(if harvesting for the first time, make sure to use "harvest from start"). 
+
+#### define event-stream
 define which eventstream to harvest: 
+- objects
+- agents
+- archive
+- concepts
+- exhibitions
 
 ### run service 
 to run the service, use the following commands in the terminal. 
