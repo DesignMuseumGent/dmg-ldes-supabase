@@ -11,12 +11,29 @@ Node service  using the treeCG actor-init-ldes-client for harvesting Linked Data
 
 Make sure you have Node installed on your device. 
 
-1. add .env at top level containing the credentials to connect with PG. (we are running our instance on a Supabase)
+### install dependencies 
+```
+npm install --save
+```
+
+### setup environment
+
+add .env at top level containing the credentials to connect with PG. (we are running our instance on a Supabase)
 
 ```
 SUPABASE_KEY= *****
 SUPABSASE_URL = *****
 ```
+
+### set range 
+
+### run service 
+to run the service, use the following commands in the terminal. 
+```
+node index.js
+```
+
+
 
 
 
