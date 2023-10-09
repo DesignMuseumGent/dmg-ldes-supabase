@@ -8,8 +8,9 @@ import {
 
 function executeEveryMonday() {
     setInterval(function() {
-        var currentDate = new Date();
-        if (currentDate.getDay() === 1 && currentDate.getHours() === 15) {
+
+        var currentDate = new Date(); // initiate current data
+        if (currentDate.getHours() === 8) { // run every morning at 08:00
             try {
                 console.log("fetching human made objects")
                 fetchObjectLDES();
@@ -29,8 +30,7 @@ function executeEveryMonday() {
             } catch(e) {
                 console.log(e)
             }
-
-            console.log("Executing every Monday at 15:00");
+            console.log("Executing next morning at 08:00");
         }
     }, 60000); // Check every minute
 }
