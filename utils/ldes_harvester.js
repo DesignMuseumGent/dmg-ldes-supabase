@@ -6,7 +6,7 @@ import {supabase} from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 2);
+dateObj.setDate(dateObj.getDate() - 30);
 fetchFromStart.setDate(dateObj.getDate() - 2000);
 
 
@@ -81,9 +81,10 @@ export function fetchObjectLDES() {
                     let {data, error} = await supabase
                         .from("dmg_objects_LDES")
                         .select("*")
-                        .eq('is_version_of', member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                        .eq('objectNumber', member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'])
 
-                    if (data = "") {
+                    console.log(data);
+                    if (data = [""]) {
                         console.log("there is no data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         console.log("inserting: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
                         let {data, error} = await supabase
@@ -99,9 +100,17 @@ export function fetchObjectLDES() {
                             ])
                             .select()
 
-                    } else {
-                         }
-
+                    } else if (data != "") {
+                            console.log("there is data for: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                            console.log("updating: " + member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"])
+                            let {data, error} = await supabase.from('dmg_objects_LDES')
+                                .update([
+                                    {
+                                        LDES_raw: member,
+                                        generated_at_time: member["object"]["prov:generatedAtTime"]
+                                    }])
+                                .eq('objectNumber', member["object"]['http://www.w3.org/ns/adms#identifier'][1]['skos:notation']['@value'])
+                        }
                     } else if (options.representation === "Quads") {
                     /* When using Quads representation, the members adhere to the [@Treecg/types Member interface](https://github.com/TREEcg/types/blob/main/lib/Member.ts)
                         interface Member {
