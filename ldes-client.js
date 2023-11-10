@@ -1,40 +1,46 @@
 import {
-    fetchObjectLDES,
-    fetchThesaurusLDES,
-    fetchPersonenLDES,
-    fetchExhibitionLDES,
-    fetchArchiveLDES
+  fetchObjectLDES,
+  fetchThesaurusLDES,
+  fetchPersonenLDES,
+  fetchExhibitionLDES,
+  fetchArchiveLDES,
 } from "./utils/ldes_harvester.js";
 
-function executeEveryMonday() {
-    setInterval(function() {
+import cron from "node-cron";
 
-        var currentDate = new Date(); // initiate current data
-        if (currentDate.getHours() === 8) { // run every morning at 08:00
-            try {
-                console.log("fetching human made objects")
-                fetchObjectLDES();
+function main() {
+  console.log("----------------------------------------------------------");
+  console.log("             start sync LDES-postGres                     ");
+  console.log("                                                          ");
+  console.log("----------------------------------------------------------");
 
-                console.log("fetching thesaurus")
-                fetchThesaurusLDES()
+  try {
+    console.log("fetching human made objects");
+    fetchObjectLDES();
 
-                console.log("fetching exhibition")
-                fetchExhibitionLDES();
+    console.log("fetching thesaurus");
+    fetchThesaurusLDES();
 
-                console.log("fetching agents")
-                fetchPersonenLDES();
+    console.log("fetching exhibition");
+    fetchExhibitionLDES();
 
-                fetchArchiveLDES()
-                console.log("done harvesting LDES")
+    console.log("fetching agents");
+    fetchPersonenLDES();
 
-            } catch(e) {
-                console.log(e)
-            }
-            console.log("Executing next morning at 08:00");
-        }
-    }, 60000); // Check every minute
+    fetchArchiveLDES();
+    console.log("done harvesting LDES");
+  } catch (e) {
+    console.log(e);
+  }
+
+  console.log("----------------------------------------------------------");
+  console.log("             finished sync LDES-postGres                  ");
+  console.log("                                                          ");
+  console.log("----------------------------------------------------------");
 }
 
-executeEveryMonday()
+// run this script every day at 23:00
+cron.schedule("0 23 * * *", () => {
+  main();
+});
 
-fetchObjectLDES();
