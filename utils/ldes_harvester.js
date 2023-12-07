@@ -6,7 +6,7 @@ import { supabase } from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 2000000);
+dateObj.setDate(dateObj.getDate() - 5);
 fetchFromStart.setDate(dateObj.getDate() - 2000);
 
 export function fetchPrivateObjectsLDES() {
