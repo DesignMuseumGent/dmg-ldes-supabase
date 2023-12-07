@@ -44,3 +44,4 @@ cron.schedule("0 23 * * *", () => {
   main();
 });
 
+fetchObjectLDES();
