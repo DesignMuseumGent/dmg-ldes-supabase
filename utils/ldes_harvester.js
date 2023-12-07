@@ -1,4 +1,4 @@
-import { newEngine } from "@treecg/actor-init-ldes-client";
+import { EventStream, newEngine } from "@treecg/actor-init-ldes-client";
 import { supabase } from "./supabaseClient.js";
 
 // calculation of yesterday's date
@@ -6,8 +6,155 @@ import { supabase } from "./supabaseClient.js";
 var dateObj = new Date();
 var fetchFromStart = new Date();
 // subtract one day from current time
-dateObj.setDate(dateObj.getDate() - 100);
+dateObj.setDate(dateObj.getDate() - 2000000);
 fetchFromStart.setDate(dateObj.getDate() - 2000);
+
+export function fetchPrivateObjectsLDES() {
+  const private_harvest = [];
+  const apiKey = process.env.API_KEY_PRIVATE_LDES;
+  const options = {};
+
+  try {
+    let url =
+      "https://apidgdv.gent.be/opendata/eventstream-api-private/v1/dmg/objecten";
+    let options = {
+      pollingInterval: 5000,
+      disablePolling: true,
+      representation: "Object",
+      mimeType: "application/ld+json",
+      requestHeaders: {
+        Accept: "application/ld+json",
+        apiKey: apiKey,
+      },
+      fromTime: new Date(dateObj),
+      emitMemberOnce: true,
+      disableSynchronization: true,
+      disableFraming: false,
+      jsonLdContext: {
+        "@context": [
+          {
+            "dcterms:isVersionOf": {
+              "@type": "@id",
+            },
+            prov: "http://www.w3.org/ns/prov#",
+            skos: "http://www.w3.org/2004/02/skos/core#",
+            label: "http://www.w3.org/2000/01/rdf-schema#label",
+            opmerking: "http://www.w3.org/2004/02/skos/core#note",
+            "foaf:page": {
+              "@type": "@id",
+            },
+            cest: "https://www.projectcest.be/wiki/Publicatie:Invulboek_objecten/Veld/",
+            inhoud:
+              "http://www.cidoc-crm.org/cidoc-crm/P190_has_symbolic_content",
+            la: "https://linked.art/ns/terms/",
+            conforms_to: {
+              "@id": "dcterms:conformsTo",
+              "@type": "@id",
+              "@container": "@set",
+            },
+            equivalent: {
+              "@id": "la:equivalent",
+              "@type": "@id",
+            },
+            dig: "http://www.ics.forth.gr/isl/CRMdig/",
+            DigitalObject: {
+              "@id": "dig:D1_Digital_Object",
+            },
+            kwalificatie: {
+              "@id": "http://purl.org/ontology/af/confidence",
+            },
+          },
+        ],
+      },
+    };
+
+    let LDESClient = newEngine();
+    let eventstreamSync = LDESClient.createReadStream(url, options);
+    eventstreamSync.on("data", async (member) => {
+      if (options.representation) {
+        if (options.representation === "Object") {
+          private_harvest.push(member);
+
+          // declare varibles
+          let ObjectNumber =
+            member["object"]["http://www.w3.org/ns/adms#identifier"][1][
+              "skos:notation"
+            ]["@value"];
+
+          let _id =
+            member["object"]["http://purl.org/dc/terms/isVersionOf"]["@id"];
+
+          // check if record already exists in DB
+
+          let data, error;
+          try {
+            ({ data, error } = await supabase
+              .from("dmg_private_objects_LDES")
+              .select("*")
+              .eq("objectNumber", ObjectNumber));
+          } catch (e) {
+            console.error(e);
+          }
+
+          // if not: insert member as a new object
+          // based on length of array (if 0 = empty)
+          if (data && Array.isArray(data) && data.length == 0) {
+            console.log("*-----------------------------------*");
+            console.log("checking: ", ObjectNumber, data.length);
+            console.log("there is no data for: ", _id);
+
+            let insertError;
+
+            try {
+              ({ error: insertError } = await supabase
+                .from("dmg_private_objects_LDES")
+                .insert({
+                  LDES_raw: member,
+                  objectNumber: ObjectNumber,
+                  generated_at_time: member["object"]["prov:generatedAtTime"],
+                  is_version_of: _id,
+                }));
+            } catch (insertError) {
+              console.error(insertError);
+            }
+
+            console.log("data added");
+            console.log("*----------------------------------*");
+
+            // if it does: update member data;
+          } else if (data && Array.isArray(data) && data.length > 0) {
+            console.log("*----------------------------------*");
+            console.log("updating: ", ObjectNumber);
+            console.log("*----------------------------------*");
+
+            let { data, error } = await supabase
+              .from("dmg_private_objects_LDES")
+              .update({
+                LDES_raw: member,
+                generated_at_time: member["object"]["prov:generatedAtTime"],
+              })
+              .eq("objectNumber", ObjectNumber);
+          }
+        } else if (options.representation === "Quads") {
+          // insert code here to retrieve Quads data
+        }
+      }
+    });
+
+    eventstreamSync.on("metadata", (metadata) => {
+      if (metadata.treeMetadata);
+    });
+
+    eventstreamSync.on("pause", () => {
+      let state = eventstreamSync.exportState();
+    });
+
+    eventstreamSync.on("end", () => {});
+    return private_harvest;
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 export function fetchObjectLDES() {
   const ldes_harvest = [];
@@ -130,12 +277,10 @@ export function fetchObjectLDES() {
 
             let { data, error } = await supabase
               .from("dmg_objects_LDES")
-              .update([
-                {
-                  LDES_raw: member,
-                  generated_at_time: member["object"]["prov:generatedAtTime"],
-                },
-              ])
+              .update({
+                LDES_raw: member,
+                generated_at_time: member["object"]["prov:generatedAtTime"],
+              })
               .eq("objectNumber", _objectNumber);
           }
         } else if (options.representation === "Quads") {

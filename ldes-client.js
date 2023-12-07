@@ -4,6 +4,7 @@ import {
   fetchPersonenLDES,
   fetchExhibitionLDES,
   fetchArchiveLDES,
+  fetchPrivateObjectsLDES,
 } from "./utils/ldes_harvester.js";
 
 import cron from "node-cron";
@@ -29,6 +30,9 @@ function main() {
 
     fetchArchiveLDES();
     console.log("done harvesting LDES");
+
+    fetchPrivateObjectsLDES();
+    console.log("done fetching private objects");
   } catch (e) {
     console.log(e);
   }
@@ -44,4 +48,4 @@ cron.schedule("0 23 * * *", () => {
   main();
 });
 
-fetchObjectLDES();
+fetchPrivateObjectsLDES();
